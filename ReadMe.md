@@ -41,9 +41,9 @@ Figure 2. Densification results. Right: rgb results (color obtained from a calib
 #### 2.1 Hashing via Back Projection
 Down to its essence, our densification is a interpolation specifically designed for Lidar. In any interpolation, <u>the very first thing we need to know is neighborhood adjacency</u>. In other words, among all points in our point cloud, which ones are near to each other, so that we could move forward to actually interpolate between them.
 
-In an image captured by a camera, the data is represented as a ![](./eqs/eq1.svg) grid (per channel), which means getting neighborhood is trivially easy. However, this is not the case for our unordered Lidar data, which is originally represented as a ![](./eqs/eq2.svg) matrix, where ![](./eqs/eq3.svg) is the number of points. To give a better idea on this, one single frame of Lidar has somewhere around 10k points.
+In an image captured by a camera, the data is represented as a ![](./eqs/eq1.png) grid (per channel), which means getting neighborhood is trivially easy. However, this is not the case for our unordered Lidar data, which is originally represented as a ![](./eqs/eq2.png) matrix, where ![](./eqs/eq3.png) is the number of points. To give a better idea on this, one single frame of Lidar has somewhere around 10k points.
 
-To get adjacency, one of the most brain dead solution is perhaps brute-force search. Obviously, this isn't very efficient as it takes ![](./eqs/eq4.svg) to compute all pairwise adjacency. A cleverer solution is using a kd-tree, which on average takes ![](./eqs/eq5.svg) to construct and another ![](./eqs/eq5.svg) to compute adjacency.
+To get adjacency, one of the most brain dead solution is perhaps brute-force search. Obviously, this isn't very efficient as it takes ![](./eqs/eq4.png) to compute all pairwise adjacency. A cleverer solution is using a kd-tree, which on average takes ![](./eqs/eq5.png) to construct and another ![](./eqs/eq5.png) to compute adjacency.
 
 Is there a even better solution for this? The answer is yes. But first, let's take a brief look at how a Lidar works:
 
@@ -53,9 +53,9 @@ Is there a even better solution for this? The answer is yes. But first, let's ta
 Figure 3. Lidar lasers spinning horizontally.
 </center>
 
-As we can see, a Lidar is essentially a point in space that shoots beams with various tilt and yaw. Keeping this in mind, we can easily define such 2-d polar coordinate system: ![](./eqs/eq6.svg) shown as the green arrow and ![](./eqs/eq7.svg) shown as the red arrow. Since different lasers points to different ![](./eqs/eq6.svg) and one Lidar frame scans 360-degree of ![](./eqs/eq7.svg) without overlapping, <u>these two polar coordinates gives us a hashing function that guarantees to find all neighbors using a window just like an image, and has no collision if with the proper resolution</u>. 
+As we can see, a Lidar is essentially a point in space that shoots beams with various tilt and yaw. Keeping this in mind, we can easily define such 2-d polar coordinate system: ![](./eqs/eq6.png) shown as the green arrow and ![](./eqs/eq7.png) shown as the red arrow. Since different lasers points to different ![](./eqs/eq6.png) and one Lidar frame scans 360-degree of ![](./eqs/eq7.png) without overlapping, <u>these two polar coordinates gives us a hashing function that guarantees to find all neighbors using a window just like an image, and has no collision if with the proper resolution</u>. 
 
-Using this, we are able to compute all pairwise adjacency with ![](./eqs/eq8.svg), which means we save more than hundred millions of operations.
+Using this, we are able to compute all pairwise adjacency with ![](./eqs/eq8.png), which means we save more than hundred millions of operations.
 
 #### 2.2 Scaled Thresholding
 
@@ -71,7 +71,7 @@ Figure 4. Top-down view of Lidar capturing two sensor-facing surfaces, one neare
 
 Let's assume for now that we have two surfaces in the scene that happen to be perfectly perpendicular to laser rays, but one is nearer and the other is farther. Our goal here, is to connect every two initially isolated points when they are pointing at the same surface, and not to connect when otherwise. 
 
-Let's denote the Lidar angular resolution as ![](./eqs/eq9.svg), which in practice is a very small angle (0.09 degree for the widely used Velodyne HDL-64E Lidar). Let's also assume that we have two adjacent laser points detecting a common perpendicular surface with distance value ![](./eqs/eq10.svg). We can therefore calculate that the difference of distance value is ![](./eqs/eq11.svg), which explains our scaled threshold value.
+Let's denote the Lidar angular resolution as ![](./eqs/eq9.png), which in practice is a very small angle (0.09 degree for the widely used Velodyne HDL-64E Lidar). Let's also assume that we have two adjacent laser points detecting a common perpendicular surface with distance value ![](./eqs/eq10.png). We can therefore calculate that the difference of distance value is ![](./eqs/eq11.png), which explains our scaled threshold value.
 
 It should be noted that, however, this thresholding does not recover surfaces that nearly sensor-parallel. As shown below:
 
@@ -81,10 +81,10 @@ It should be noted that, however, this thresholding does not recover surfaces th
 Figure 5. A surface is less likely to be recovered, as it becomes more parallel to the laser ray.
 </center>
 
-This problem is inevitable for any sensor that makes discrete measurements of the world. Given a fixed angular resolution, we could never tell if there really is an in-measurable parallel surface, or as what our method would result in, there is nothing but just empty space. With further calculation, we know that for a given angular resolution ![](./eqs/eq9.svg) and a given threshold value ![](./eqs/eq12.svg) (the value we multiply ![](./eqs/eq10.svg) with), the minimal surface-laser angle that can be recovered is
+This problem is inevitable for any sensor that makes discrete measurements of the world. Given a fixed angular resolution, we could never tell if there really is an in-measurable parallel surface, or as what our method would result in, there is nothing but just empty space. With further calculation, we know that for a given angular resolution ![](./eqs/eq9.png) and a given threshold value ![](./eqs/eq12.png) (the value we multiply ![](./eqs/eq10.png) with), the minimal surface-laser angle that can be recovered is
 
 <center>
-![](./eqs/eq13.svg)
+![](./eqs/eq13.png)
 </center>
 
 which can be plotted as
@@ -92,10 +92,10 @@ which can be plotted as
 <center>
 <img src="./imgs/thres_angle.png" width="450">
 
-Figure 6. Minimum recoverable surface-laser angle versus different threshold value ![](./eqs/eq12.svg), with angular resolution ![](./eqs/eq9.svg) as 0.01 (red), 0.05 (cyan), 0.1 (green), 0.2 (magenta), and 0.5 (blue).
+Figure 6. Minimum recoverable surface-laser angle versus different threshold value ![](./eqs/eq12.png), with angular resolution ![](./eqs/eq9.png) as 0.01 (red), 0.05 (cyan), 0.1 (green), 0.2 (magenta), and 0.5 (blue).
 </center>
 
-This gives some theoretical guidance on how to choose ![](./eqs/eq12.svg). <u>Although in practice, we can simply just trail-and-error a few times, since this only needs to be done once per Lidar.</u>
+This gives some theoretical guidance on how to choose ![](./eqs/eq12.png). <u>Although in practice, we can simply just trail-and-error a few times, since this only needs to be done once per Lidar.</u>
 
 #### 2.3 Approximating the Local Hull
 
