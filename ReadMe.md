@@ -4,9 +4,9 @@
 ### 1. Why we do this
 Lidar is becoming a more and more important type of sensor in machine perception applications, especially self-driving cars & drones. There has been concerns about its price, but recent trend has shown very positive signs of significant decrease in the manufacturing cost of Lidar.
 
-Let me make a bold prediction: <u>Lidar will be everywhere in a few years.</u> Therefore, we need to prepare ourselves for the upcoming future.
+Let me make a bold prediction: **Lidar will be everywhere in a few years.** Therefore, we need to prepare ourselves for the upcoming future.
 
-<u>However, as far as I know of as a computer vision researcher, things becomes messy and tricky when it comes to using Lidar data.</u> Unlike an image in a strict 2-d grid, or an audio as a 1-d waveform, Lidar data is way less formatted. To give you an illustration of what I'm talking about, let's look at the following example of one frame of Lidar data:
+**However, as far as I know of as a computer vision researcher, things becomes messy and tricky when it comes to using Lidar data.** Unlike an image in a strict 2-d grid, or an audio as a 1-d waveform, Lidar data is way less formatted. To give you an illustration of what I'm talking about, let's look at the following example of one frame of Lidar data:
 
 <center>
 <img src="./imgs/lidar.png" width="600">
@@ -14,21 +14,21 @@ Let me make a bold prediction: <u>Lidar will be everywhere in a few years.</u> T
 Figure 1. An example of Lidar data from the KITTI dataset, point color obtained from a calibrated and synchronized camera.
 </center>
 
-Can't really see anything, right? The reason is that Lidar data is captured as a scattered, sparse point cloud. To solve this problem in hope of making Lidar data just a little bit more user-friendly, with all sincerity, <u>we present a method that:</u>
+Can't really see anything, right? The reason is that Lidar data is captured as a scattered, sparse point cloud. To solve this problem in hope of making Lidar data just a little bit more user-friendly, with all sincerity, **we present a method that:**
 
 - make the sparse Lidar data dense
 - keep sharp object boundaries
 - eliminate sensory artifacts of decreasing point density over distance
 - is extremely efficient that runs in real time on a common computer
 
-<u>In short, we want to make Lidar data dense, clean, and uniform, with minimal amount of computation.</u> With such method, our goal is to make things a bit easier for:
+**In short, we want to make Lidar data dense, clean, and uniform, with minimal amount of computation.** With such method, our goal is to make things a bit easier for:
 
 - sensor fusion, e.g. between Lidar and camera
 - effective 3-d perception algorithms that have less headaches of sensory issues
 
 Just to give you an idea before we dive into the details, here is our result: 
 
-(Note that <u>our method only takes one single frame of Lidar scan as input</u>. The rgb camera intensities were added afterwards only for better visualization. Neither image, nor other temporally adjacent Lidar frames are used.)
+(Note that **our method only takes one single frame of Lidar scan as input**. The rgb camera intensities were added afterwards only for better visualization. Neither image, nor other temporally adjacent Lidar frames are used.)
 
 <center>
 <img src="./imgs/dense.gif" width="600">
@@ -39,7 +39,7 @@ Figure 2. Densification results. Right: rgb results (color obtained from a calib
 ### 2. The method
 
 #### 2.1 Hashing via Back Projection
-Down to its essence, our densification is a interpolation specifically designed for Lidar. In any interpolation, <u>the very first thing we need to know is neighborhood adjacency</u>. In other words, among all points in our point cloud, which ones are near to each other, so that we could move forward to actually interpolate between them.
+Down to its essence, our densification is a interpolation specifically designed for Lidar. In any interpolation, **the very first thing we need to know is neighborhood adjacency**. In other words, among all points in our point cloud, which ones are near to each other, so that we could move forward to actually interpolate between them.
 
 In an image captured by a camera, the data is represented as a ![](./eqs/eq1.png) grid (per channel), which means getting neighborhood is trivially easy. However, this is not the case for our unordered Lidar data, which is originally represented as a ![](./eqs/eq2.png) matrix, where ![](./eqs/eq3.png) is the number of points. To give a better idea on this, one single frame of Lidar has somewhere around 10k points.
 
@@ -53,15 +53,15 @@ Is there a even better solution for this? The answer is yes. But first, let's ta
 Figure 3. Lidar lasers spinning horizontally.
 </center>
 
-As we can see, a Lidar is essentially a point in space that shoots beams with various tilt and yaw. Keeping this in mind, we can easily define such 2-d polar coordinate system: ![](./eqs/eq6.png) shown as the green arrow and ![](./eqs/eq7.png) shown as the red arrow. Since different lasers points to different ![](./eqs/eq6.png) and one Lidar frame scans 360-degree of ![](./eqs/eq7.png) without overlapping, <u>these two polar coordinates gives us a hashing function that guarantees to find all neighbors using a window just like an image, and has no collision if with the proper resolution</u>. 
+As we can see, a Lidar is essentially a point in space that shoots beams with various tilt and yaw. Keeping this in mind, we can easily define such 2-d polar coordinate system: ![](./eqs/eq6.png) shown as the green arrow and ![](./eqs/eq7.png) shown as the red arrow. Since different lasers points to different ![](./eqs/eq6.png) and one Lidar frame scans 360-degree of ![](./eqs/eq7.png) without overlapping, **these two polar coordinates gives us a hashing function that guarantees to find all neighbors using a window just like an image, and has no collision if with the proper resolution**. 
 
 Using this, we are able to compute all pairwise adjacency with ![](./eqs/eq8.png), which means we save more than hundred millions of operations.
 
 #### 2.2 Scaled Thresholding
 
-<u>In the previous step, what we have found is not the exact neighborhood, but its super-set.</u> In other words, anything outside our window in the back projection image is guaranteed to have at least certain distance to the center point, with the proper window size specified. However, inside the window, not all points are necessarily neighbors because they could have any point-to-sensor distance value.
+**In the previous step, what we have found is not the exact neighborhood, but its super-set.** In other words, anything outside our window in the back projection image is guaranteed to have at least certain distance to the center point, with the proper window size specified. However, inside the window, not all points are necessarily neighbors because they could have any point-to-sensor distance value.
 
-To address this, we simply apply a threshold on the difference of distance values between any in-window point and the center point. <u>For the threshold, we set it proportional to the center point's distance value, instead of using a constant one.</u> This is because of how Lidar data is captured, as shown below:
+To address this, we simply apply a threshold on the difference of distance values between any in-window point and the center point. **For the threshold, we set it proportional to the center point's distance value, instead of using a constant one.** This is because of how Lidar data is captured, as shown below:
 
 <center>
 <img src="./imgs/scale_thres.png" width="150">
@@ -95,11 +95,11 @@ which can be plotted as
 Figure 6. Minimum recoverable surface-laser angle versus different threshold value ![](./eqs/eq12.png), with angular resolution ![](./eqs/eq9.png) as 0.01 (red), 0.05 (cyan), 0.1 (green), 0.2 (magenta), and 0.5 (blue).
 </center>
 
-This gives some theoretical guidance on how to choose ![](./eqs/eq12.png). <u>Although in practice, we can simply just trail-and-error a few times, since this only needs to be done once per Lidar.</u>
+This gives some theoretical guidance on how to choose ![](./eqs/eq12.png). **Although in practice, we can simply just trail-and-error a few times, since this only needs to be done once per Lidar.**
 
 #### 2.3 Approximating the Local Hull
 
-Now that we know which pairs of points should be connected, we still need to determine the exact regions to interpolate. <u>Essentially, this is approximation of a local hull where the center sits in, given a few known neighboring points.</u>
+Now that we know which pairs of points should be connected, we still need to determine the exact regions to interpolate. **Essentially, this is approximation of a local hull where the center sits in, given a few known neighboring points.**
 
 This is done in two steps. First, sorting neighbors by their angle relative to the center point. Second, joining the points to form a closed hull (or polygon).
 
@@ -114,13 +114,13 @@ Figure 7. The two cases in the second point-joining step, neighboring points are
 
 #### 2.4 Interpolating Distance Values
 
-Okay, we know the region to interpolate, but how exactly are we going to materialize it? We simply compute the interpolated the distance value inside the hull. Specifically, <u>we perform this interpolation using rasterization in the angular space, one triangle at a time</u>.
+Okay, we know the region to interpolate, but how exactly are we going to materialize it? We simply compute the interpolated the distance value inside the hull. Specifically, **we perform this interpolation using rasterization in the angular space, one triangle at a time**.
 
 This is just the formal way of saying it. Concretely, here is how it is done. The hull is divided into several triangles, where each triangle has two neighbors and the center point as its vertices. Within the triangle, we divide it into fan-shaped angular sections. The final interpolated distance value of a point is then determined based on the section's angle with respect to the two neighbors' angles, as well as the point's distance to the center.
 
 #### 2.5 Making the Final Mesh
 
-We are almost done! Having finished all previous steps, what we have got is a dense, and clear-edged distance image. All we need to do now, is <u>putting it back in the 3-d space, and gluing it into a real mesh</u>.
+We are almost done! Having finished all previous steps, what we have got is a dense, and clear-edged distance image. All we need to do now, is **putting it back in the 3-d space, and gluing it into a real mesh**.
 
 Converting two a point in 3-d is trivial geometry, as we already have its tilt, yaw, and distance. As for generating the mesh, we apply this simple two-step process: For each point in the distance image, determine if it is neighboring to its up, down, left, and right pixel using the same scaled thresholding in 2.2. Next, generate tiny  isosceles right triangles for neighboring directions, each takes a quarter of the square-pixel in the angular distance image grid.
 
