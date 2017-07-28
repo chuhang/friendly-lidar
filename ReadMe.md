@@ -84,7 +84,7 @@ Figure 5. A surface is less likely to be recovered, as it becomes more parallel 
 This problem is inevitable for any sensor that makes discrete measurements of the world. Given a fixed angular resolution, we could never tell if there really is an in-measurable parallel surface, or as what our method would result in, there is nothing but just empty space. With further calculation, we know that for a given angular resolution ![](./eqs/eq9.png) and a given threshold value ![](./eqs/eq12.png) (the value we multiply ![](./eqs/eq10.png) with), the minimal surface-laser angle that can be recovered is
 
 <center>
-![](./eqs/eq13.png)
+<img src="./eqs/eq13.png">
 </center>
 
 which can be plotted as
